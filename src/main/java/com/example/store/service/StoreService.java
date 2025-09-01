@@ -9,11 +9,13 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.UUID;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
+@Validated
 public class StoreService {
 
     @Autowired

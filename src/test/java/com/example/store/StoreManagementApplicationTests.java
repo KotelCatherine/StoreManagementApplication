@@ -5,6 +5,7 @@ import com.example.store.repository.StoreRepository;
 import com.example.store.request.StoreRequest;
 import com.example.store.service.StoreService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class StoreManagementApplicationTests extends TestContainerInitialization {
 
         StoreRequest storeRequest = createStoreRequest("", "ул. Урванцева");
 
-        Assertions.assertThrows(MethodArgumentNotValidException.class, ()-> service.createStore(storeRequest));
+        Assertions.assertThrows(ConstraintViolationException.class, ()-> service.createStore(storeRequest));
 
     }
 
@@ -41,7 +42,7 @@ class StoreManagementApplicationTests extends TestContainerInitialization {
 
         StoreRequest storeRequest = createStoreRequest("Красный Яр", "");
 
-        Assertions.assertThrows(MethodArgumentNotValidException.class, ()-> service.createStore(storeRequest));
+        Assertions.assertThrows(ConstraintViolationException.class, ()-> service.createStore(storeRequest));
 
     }
 
