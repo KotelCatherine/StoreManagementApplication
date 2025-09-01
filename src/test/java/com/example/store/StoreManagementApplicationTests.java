@@ -1,4 +1,4 @@
-package com.example.store.controller;
+package com.example.store;
 
 import com.example.store.dto.StoreResponseDto;
 import com.example.store.repository.StoreRepository;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @SpringBootTest
 @Transactional
@@ -32,7 +32,16 @@ class StoreManagementApplicationTests extends TestContainerInitialization {
 
         StoreRequest storeRequest = createStoreRequest("", "ул. Урванцева");
 
-        Assertions.assertThrows(DataIntegrityViolationException.class, ()-> service.createStore(storeRequest));
+        Assertions.assertThrows(MethodArgumentNotValidException.class, ()-> service.createStore(storeRequest));
+
+    }
+
+    @Test
+    void createStore_whenLocationIsBlank_thenThrow() {
+
+        StoreRequest storeRequest = createStoreRequest("Красный Яр", "");
+
+        Assertions.assertThrows(MethodArgumentNotValidException.class, ()-> service.createStore(storeRequest));
 
     }
 

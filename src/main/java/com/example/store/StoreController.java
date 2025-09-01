@@ -1,4 +1,4 @@
-package com.example.store.controller;
+package com.example.store;
 
 import com.example.store.dto.StoreResponseDto;
 import com.example.store.request.StoreRequest;

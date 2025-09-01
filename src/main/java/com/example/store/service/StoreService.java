@@ -6,6 +6,7 @@ import com.example.store.mapper.StoreMapper;
 import com.example.store.repository.StoreRepository;
 import com.example.store.request.StoreRequest;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class StoreService {
     @Autowired
     private StoreMapper mapper;
 
-    public StoreResponseDto createStore(StoreRequest request) {
+    public StoreResponseDto createStore(@Valid StoreRequest request) {
 
         Store store = new Store(UUID.randomUUID(), request.getName(), request.getLocation(), null);
 
