@@ -33,8 +33,10 @@ public class Store {
     @Column
     private String location;
 
-
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Column
+    private String email;
 
 }

@@ -4,3 +4,4 @@ CREATE TABLE IF NOT EXISTS stores (
     location TEXT,
     updated_at TIMESTAMP
 );
+

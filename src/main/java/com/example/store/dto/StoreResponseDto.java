@@ -22,4 +22,7 @@ public class StoreResponseDto {
     @Schema(description = "Местоположение магазина")
     private String location;
 
+    @Schema(description = "Электронная почта магазина")
+    private String email;
+
 }

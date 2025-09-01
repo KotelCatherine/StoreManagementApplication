@@ -26,7 +26,7 @@ public class StoreService {
 
     public StoreResponseDto createStore(@Valid StoreRequest request) {
 
-        Store store = new Store(UUID.randomUUID(), request.getName(), request.getLocation(), null);
+        Store store = new Store(UUID.randomUUID(), request.getName(), request.getLocation(), null, request.getEmail());
 
         storeRepository.saveAndFlush(store);
 
@@ -47,7 +47,7 @@ public class StoreService {
 
     }
 
-    public StoreResponseDto updateStore(UUID id, StoreRequest request) {
+    public StoreResponseDto updateStore(UUID id, @Valid StoreRequest request) {
 
         Store store = storeRepository.findById(id)
                 .orElseThrow();

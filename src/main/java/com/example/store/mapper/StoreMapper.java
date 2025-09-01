@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class StoreMapper {
     public StoreResponseDto mapToStoreResponseDto(Store store) {
-        return new StoreResponseDto(store.getId(), store.getName(), store.getLocation());
+        return new StoreResponseDto(store.getId(), store.getName(), store.getLocation(), store.getEmail());
     }
 }
