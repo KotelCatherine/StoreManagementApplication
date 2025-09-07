@@ -54,6 +54,7 @@ public class StoreService {
 
         store.setName(request.getName());
         store.setLocation(request.getLocation());
+        store.setEmail(request.getEmail());
 
         storeRepository.saveAndFlush(store);
 
