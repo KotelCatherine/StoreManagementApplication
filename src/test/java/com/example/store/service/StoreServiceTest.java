@@ -14,23 +14,25 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @SpringBootTest
+@Transactional
 class StoreServiceTest extends TestContainerInitialization {
 
     public static final String DEFAULT_STORE_LOCATION = "ул. Ленина";
+    public static final String DEFAULT_STORE_NAME = "Пятёрочка";
+    public static final String DEFAULT_STORE_EMAIL = "mail@ya.ru";
+
     @Autowired
     private StoreRepository repository;
 
     @Autowired
     private StoreService service;
-
-    public static final String DEFAULT_STORE_NAME = "Пятёрочка";
-    public static final String DEFAULT_STORE_EMAIL = "mail@ya.ru";
 
 
     @AfterEach
