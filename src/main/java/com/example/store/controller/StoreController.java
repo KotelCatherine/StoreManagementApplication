@@ -3,6 +3,7 @@ package com.example.store.controller;
 import com.example.store.dto.AllStoresResponseDto;
 import com.example.store.dto.ProductResponseDto;
 import com.example.store.dto.StoreResponseDto;
+import com.example.store.request.ProductRequest;
 import com.example.store.request.StoreRequest;
 import com.example.store.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,5 +111,17 @@ public class StoreController {
         return ResponseEntity.ok(allProducts);
 
     }
+
+    @GetMapping("/products/unique")
+    @Operation(summary = "Найти уникальные товары", description = "Товары, которые продаются только в одном магазине")
+    public ResponseEntity<List<ProductResponseDto>> findUniqueProducts() {
+        return ResponseEntity.ok(storeService.findUniqueProducts());
+    }
+
+    @PostMapping("/product/{storeId}")
+    public ResponseEntity<ProductResponseDto> createProduct(@PathVariable UUID storeId, @RequestBody ProductRequest request) {
+        return ResponseEntity.ok(storeService.createProduct(storeId, request));
+    }
+
 
 }

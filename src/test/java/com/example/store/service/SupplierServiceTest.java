@@ -161,7 +161,6 @@ class SupplierServiceTest extends TestContainerInitialization {
 
 
 
-        suppliers.forEach(System.out::println);
 
     }
 

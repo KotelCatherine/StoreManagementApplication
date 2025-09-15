@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import java.util.UUID;
 
 @Data
-@Entity(name = "stores")
+@Entity(name = "stores_products")
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode

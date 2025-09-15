@@ -2,8 +2,13 @@ package com.example.store.service;
 
 import com.example.store.TestContainerInitialization;
 import com.example.store.dto.AllStoresResponseDto;
+import com.example.store.dto.ProductResponseDto;
 import com.example.store.dto.StoreResponseDto;
+import com.example.store.entity.Product;
 import com.example.store.entity.Store;
+import com.example.store.entity.StoreProduct;
+import com.example.store.repository.ProductRepository;
+import com.example.store.repository.StoreProductRepository;
 import com.example.store.repository.StoreRepository;
 import com.example.store.request.StoreRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -17,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -41,6 +47,10 @@ class StoreServiceTest extends TestContainerInitialization {
 
     @Autowired
     private StoreService service;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private StoreProductRepository storeProductRepository;
 
 
     @AfterEach
@@ -171,7 +181,11 @@ class StoreServiceTest extends TestContainerInitialization {
 
     @Test
     void findByLocation_whenStoresNotExist_thenEmptyList() {
-        Assertions.assertEquals(0, service.findByLocation("ул. Урванцева").size());
+
+        int size = service.findByLocation("ул. Урванцева").size();
+
+        Assertions.assertEquals(0, size);
+
     }
 
     @Test
@@ -181,7 +195,9 @@ class StoreServiceTest extends TestContainerInitialization {
         createStore("Красный яр", "ул. Мира", "krasyar@mail.ru");
         createStore("Магнит", "ул. Мате Залки", "magnit@mail.ru");
 
-        Assertions.assertEquals(0, service.findByLocation("ул. Урванцева").size());
+        int size = service.findByLocation("ул. Урванцева").size();
+
+        Assertions.assertEquals(0, size);
 
     }
 
@@ -197,6 +213,169 @@ class StoreServiceTest extends TestContainerInitialization {
         Assertions.assertEquals(2, stores.size());
         Assertions.assertEquals(secondStore.getName(), stores.get(0).getName());
         Assertions.assertEquals(thirdStore.getName(), stores.get(1).getName());
+
+    }
+
+    @Test
+    void findAllProductByLocation_whenStoresNotExist_thenEmptyList() {
+
+        createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+
+        List<ProductResponseDto> someStreet = Assertions.assertDoesNotThrow(() -> service.findAllProductByLocation("Some Street"));
+
+        Assertions.assertTrue(someStreet.isEmpty());
+
+    }
+
+    @Test
+    void findAllProductByLocation_whenStoresNotFoundByLocation_thenEmptyList() {
+
+        createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+
+        createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        createStore("Красный Яр", "ул. 9 Мая", "five@mail.ru");
+
+        List<ProductResponseDto> someStreet = service.findAllProductByLocation("Some Street");
+
+        Assertions.assertTrue(someStreet.isEmpty());
+
+    }
+
+    @Test
+    void findAllProductByLocation_whenLocationIsNull_thenThrow() {
+
+        Store firstStore = createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+/*
+        Store secondStore = createStore("Красный Яр", "ул. 9 Мая", "five@mail.ru");
+        Store thirdStore = createStore("Красный Яр", "ул. 9 Мая", "five@mail.ru");
+
+*/
+
+        Product firstProduct = createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        Product secondProduct = createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        Product thirdProduct = createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+
+        createProductStore(firstStore.getId(), firstProduct.getId());
+        createProductStore(firstStore.getId(), secondProduct.getId());
+        createProductStore(firstStore.getId(), thirdProduct.getId());
+
+
+        Assertions.assertThrows(NullPointerException.class, () -> service.findAllProductByLocation(null));
+
+    }
+
+    @Test
+    void findAllProductByLocation_whenStoreProductNotExist_thenEmptyList() {
+
+        createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+/*
+        Store secondStore = createStore("Красный Яр", "ул. 9 Мая", "five@mail.ru");
+        Store thirdStore = createStore("Красный Яр", "ул. 9 Мая", "five@mail.ru");
+
+*/
+
+        createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+
+        List<ProductResponseDto> someStreet =
+                Assertions.assertDoesNotThrow(() -> service.findAllProductByLocation(DEFAULT_STORE_LOCATION));
+
+        Assertions.assertTrue(someStreet.isEmpty());
+
+    }
+
+    @Test
+    void findAllProductByLocation_whenProductNotExist_thenEmptyList() {
+
+        Store firstStore = createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        createStore(DEFAULT_STORE_NAME, "SomeStreet", DEFAULT_STORE_EMAIL);
+
+        Product firstProduct = createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        Product secondProduct = createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        Product thirdProduct = createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+
+        createProductStore(firstStore.getId(), firstProduct.getId());
+        createProductStore(firstStore.getId(), secondProduct.getId());
+        createProductStore(firstStore.getId(), thirdProduct.getId());
+
+        List<ProductResponseDto> someStreet =
+                Assertions.assertDoesNotThrow(() -> service.findAllProductByLocation("SomeStreet"));
+
+        Assertions.assertTrue(someStreet.isEmpty());
+
+    }
+
+    @Test
+    void findAllProductByLocation_whenStoreAndProductExist_thenReturn() {
+
+        Store firstStore = createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        Store secondStore = createStore(DEFAULT_STORE_NAME, "SomeStreet", DEFAULT_STORE_EMAIL);
+
+        Product firstProduct = createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        Product secondProduct = createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        Product thirdProduct = createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+        Product fourthProduct = createProduct("Джин", BigDecimal.valueOf(55.12), "Напитки");
+
+        createProductStore(firstStore.getId(), firstProduct.getId());
+        createProductStore(firstStore.getId(), secondProduct.getId());
+        createProductStore(firstStore.getId(), thirdProduct.getId());
+        createProductStore(secondProduct.getId(), secondProduct.getId());
+        createProductStore(secondStore.getId(), thirdProduct.getId());
+        createProductStore(secondStore.getId(), fourthProduct.getId());
+
+        List<ProductResponseDto> allProductByLocation =
+                Assertions.assertDoesNotThrow(() -> service.findAllProductByLocation(DEFAULT_STORE_LOCATION));
+
+        Assertions.assertEquals(3, allProductByLocation.size());
+        Assertions.assertEquals(firstProduct.getId(), allProductByLocation.get(0).getId());
+
+    }
+
+    @Test
+    void findUniqueProducts_whenUniqueProductsExist_thenReturnUniqueProductList() {
+
+        Store firstStore = createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        Store secondStore = createStore("Красный Яр", "SomeStreet", DEFAULT_STORE_EMAIL);
+
+        Product firstProduct = createProduct("Лимонад", BigDecimal.valueOf(23.12), "Напитки");
+        Product secondProduct = createProduct("Кока-кола", BigDecimal.valueOf(73.67), "Напитки");
+        Product thirdProduct = createProduct("Квас", BigDecimal.valueOf(55.12), "Напитки");
+
+        createProductStore(firstStore.getId(), firstProduct.getId());
+        createProductStore(firstStore.getId(), secondProduct.getId());
+        createProductStore(firstStore.getId(), thirdProduct.getId());
+        createProductStore(secondProduct.getId(), secondProduct.getId());
+        createProductStore(secondStore.getId(), thirdProduct.getId());
+
+        List<ProductResponseDto> result = Assertions.assertDoesNotThrow(() -> service.findUniqueProducts());
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(firstProduct.getName(), result.get(0).getName());
+
+    }
+
+    private StoreProduct createProductStore(UUID storeId, UUID productId) {
+
+        StoreProduct storeProduct = new StoreProduct(UUID.randomUUID(), storeId, productId);
+
+        storeProduct = storeProductRepository.saveAndFlush(storeProduct);
+
+        return storeProduct;
+
+    }
+
+    private Product createProduct(String name, BigDecimal price, String category) {
+
+        Product product = new Product(UUID.randomUUID(), name, price, category);
+
+        product = productRepository.saveAndFlush(product);
+
+        return product;
 
     }
 
