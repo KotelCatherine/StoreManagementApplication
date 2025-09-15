@@ -1,9 +1,12 @@
 package com.example.store.controller;
 
 import com.example.store.dto.AllStoresResponseDto;
+import com.example.store.dto.ProductResponseDto;
 import com.example.store.dto.StoreResponseDto;
 import com.example.store.request.StoreRequest;
 import com.example.store.service.StoreService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +97,18 @@ public class StoreController {
 
     }
 
+    @GetMapping("/product/by_location")
+    @Operation(summary = "Найти товары во всех магазинах на указанной улице",
+            description = "Все товары в магазинах на указанной улице")
+    public ResponseEntity<List<ProductResponseDto>> findAllProductByLocation(
+            @Parameter(description = "Название улицы")
+            @RequestParam String location
+    ) {
 
+        List<ProductResponseDto> allProducts = storeService.findAllProductByLocation(location);
+
+        return ResponseEntity.ok(allProducts);
+
+    }
 
 }

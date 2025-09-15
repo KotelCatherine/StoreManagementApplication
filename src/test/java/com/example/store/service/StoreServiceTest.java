@@ -1,6 +1,7 @@
 package com.example.store.service;
 
 import com.example.store.TestContainerInitialization;
+import com.example.store.dto.AllStoresResponseDto;
 import com.example.store.dto.StoreResponseDto;
 import com.example.store.entity.Store;
 import com.example.store.repository.StoreRepository;
@@ -16,9 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+
+//TODO: − Нет кейсов:
+// email пустой;
+// удаление несуществующей записи (ожидается EmptyResultDataAccessException от deleteById);
+// проверка, что updatedAt реально меняется при update; проверка всех полей в DTO (проверяется только name).
 
 @SpringBootTest
 @Transactional
@@ -137,6 +145,58 @@ class StoreServiceTest extends TestContainerInitialization {
 
         StoreResponseDto storeResponseDto = Assertions.assertDoesNotThrow(() -> service.updateStore(store.getId(), storeRequest));
         Assertions.assertEquals(storeRequest.getName(), storeResponseDto.getName());
+
+    }
+
+    @Test
+    void findAllStores_whenStoresNotExist_thenEmptyList() {
+        Assertions.assertEquals(0, service.findAllStores().size());
+    }
+
+    @Test
+    void findAllStores_whenThereAreSeveralStores_thenReturn() {
+
+        Store firstStore = createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        Store secondStore = createStore("Красный яр", "ул. Мира", "krasyar@mail.ru");
+        Store thirdStore = createStore("Магнит", "ул. Мате Залки", "magnit@mail.ru");
+
+        List<AllStoresResponseDto> allStores = service.findAllStores();
+
+        Assertions.assertEquals(3, allStores.size());
+        Assertions.assertEquals(firstStore.getName(), allStores.get(0).getName());
+        Assertions.assertEquals(secondStore.getName(), allStores.get(1).getName());
+        Assertions.assertEquals(thirdStore.getName(), allStores.get(2).getName());
+
+    }
+
+    @Test
+    void findByLocation_whenStoresNotExist_thenEmptyList() {
+        Assertions.assertEquals(0, service.findByLocation("ул. Урванцева").size());
+    }
+
+    @Test
+    void findByLocation_whenThereAreNoStoreWithSuchLocation_thenEmptyList() {
+
+        createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        createStore("Красный яр", "ул. Мира", "krasyar@mail.ru");
+        createStore("Магнит", "ул. Мате Залки", "magnit@mail.ru");
+
+        Assertions.assertEquals(0, service.findByLocation("ул. Урванцева").size());
+
+    }
+
+    @Test
+    void findByLocation_whenThereAreStoreWithSuchLocation_thenReturn() {
+
+        createStore(DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION, DEFAULT_STORE_EMAIL);
+        Store secondStore = createStore("Красный яр", "ул. Мира", "krasyar@mail.ru");
+        Store thirdStore = createStore("Магнит", "ул. Мира", "magnit@mail.ru");
+
+        List<AllStoresResponseDto> stores = service.findByLocation("ул. Мира");
+
+        Assertions.assertEquals(2, stores.size());
+        Assertions.assertEquals(secondStore.getName(), stores.get(0).getName());
+        Assertions.assertEquals(thirdStore.getName(), stores.get(1).getName());
 
     }
 

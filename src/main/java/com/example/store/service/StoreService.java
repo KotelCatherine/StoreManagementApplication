@@ -1,16 +1,19 @@
 package com.example.store.service;
 
 import com.example.store.dto.AllStoresResponseDto;
+import com.example.store.dto.ProductResponseDto;
 import com.example.store.dto.StoreResponseDto;
 import com.example.store.entity.Store;
 import com.example.store.mapper.StoreMapper;
+import com.example.store.repository.ProductRepository;
+import com.example.store.repository.StoreProductRepository;
 import com.example.store.repository.StoreRepository;
 import com.example.store.request.StoreRequest;
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -26,6 +29,13 @@ public class StoreService {
 
     @Autowired
     private StoreMapper storeMapper;
+
+    @Autowired
+    private StoreProductRepository storeProductRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
 
     @Transactional(rollbackFor = Exception.class)
     public StoreResponseDto createStore(@Valid StoreRequest request) {
@@ -67,7 +77,7 @@ public class StoreService {
         return storeMapper.mapToStoreResponseDto(store);
 
     }
-    
+
     public List<AllStoresResponseDto> findAllStores() {
 
         List<Store> stores = storeRepository.findAll();
@@ -109,6 +119,24 @@ public class StoreService {
         storeRepository.saveAndFlush(copyStore);
 
         return storeMapper.mapToStoreResponseDto(copyStore);
+
+    }
+
+    public List<ProductResponseDto> findAllProductByLocation(String location) {
+        // получаем все магазины
+        List<Store> allStores = storeRepository.findAll();
+
+        // фильтруем магазины по указанной улице
+        List<Store> storesOnStreet = allStores.stream()
+                .filter(store -> store.getLocation().contains(location))
+                .toList();
+
+        return storesOnStreet.stream()
+                .flatMap(store -> storeProductRepository.findByStoreId(store.getId()).stream())
+                .map(storeProduct -> productRepository.findById(storeProduct.getProductId()).orElseThrow())
+                .map(product -> storeMapper.mapToProductResponseDto(product))
+                .distinct()
+                .toList();
 
     }
 
