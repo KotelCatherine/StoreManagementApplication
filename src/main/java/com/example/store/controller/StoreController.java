@@ -92,9 +92,9 @@ public class StoreController {
     @GetMapping("/{id}/copy")
     public ResponseEntity<StoreResponseDto> copyStore(@PathVariable UUID id) {
 
-        StoreResponseDto copyStoreResponceDto = storeService.copy(id);
+        StoreResponseDto copyStoreResponseDto = storeService.copy(id);
 
-        return ResponseEntity.ok(copyStoreResponceDto);
+        return ResponseEntity.ok(copyStoreResponseDto);
 
     }
 
